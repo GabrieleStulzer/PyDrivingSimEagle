@@ -110,10 +110,25 @@ class SteeringSystemData:
 # Braking system
 @dataclass
 class BrakingSystemData:
-    max_brake_torque_front : float  = 600                       # [Nm] max front braking torque that the hydraulic system can provide
-    max_brake_torque_rear : float   = 600                       # [Nm] max rear braking torque that the hydraulic system can provide
-    brakeRatio : float              = 0.5                       # [-] front/rear brake circuits pressure distribution
     totBrakeTorque : float          = 750                       # [Nm] max total brake torque that the braking system can develop (it is then split btween front/rear axles)
+    totBrakePressure : float        = 60e5                      # [Pa] max total pressure that the braking system can develop
+    # front
+    d_p_f : float                   = 0.025                     # [m] front brake piston diameter
+    n_p_f : int                     = 4                         # [-] number of front brake pistons
+    r_p_f : float                   = 69*1e-3                   # [m] front brake piston effective radius
+    mu_f : float                    = 0.42                      # [-] front brake pads/rotor friction coefficient
+    R_pp_f : float                  = 0.0756                      # [m] Front pressure point arm
+    max_brake_torque_front : float  = totBrakePressure*math.pi*R_pp_f*mu_f*n_p_f*(d_p_f**2)/4    # [Nm] max front braking torque that the hydraulic system can provide
+    # rear
+    d_p_r : float                   = 0.025                     # [m] rear brake piston diameter
+    n_p_r : int                     = 2                         # [-] number of rear brake pistons
+    r_p_r : float                   = 78.55*1e-3                # [m] rear brake piston effective radius
+    mu_r : float                    = 0.42                      # [-] rear brake pads/rotor friction coefficient
+    R_pp_r : float                  = 0.0756                    # [m] Rear pressure point arm
+    max_brake_torque_rear : float   = totBrakePressure*math.pi*R_pp_r*mu_r*n_p_r*(d_p_r**2)/4    # [Nm] max rear braking torque that the hydraulic system can provide
+
+
+    brakeRatio : float              = 0.6                       # [-] front/rear brake circuits pressure distribution
     tau_br : float                  = 0.03                      # [s] time constant for brake actuation dynamics
     regularSignScale : float        = 1                         # [rad/s] scale parameter for the regularized sign function
 
