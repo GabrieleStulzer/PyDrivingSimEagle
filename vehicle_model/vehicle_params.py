@@ -159,20 +159,20 @@ class AccumulatorData:
 @dataclass
 class VehicleData():
 # VEHICLE
-    Lf : float          = 0.904                                 # [m] Distance between vehicle CoM and front wheels axle
-    Lr : float          = 0.636                                 # [m] Distance between vehicle CoM and front wheels axle
+    Lf : float          = 0.703                                 # [m] Distance between vehicle CoM and front wheels axle
+    Lr : float          = 0.827                                 # [m] Distance between vehicle CoM and front wheels axle
     L : float           = Lf + Lr                               # [m] Vehicle wheelbase
-    hGs : float         = 0.30                                  # [m] CoM vertical position
+    hGs : float         = 0.302                                 # [m] CoM vertical position
     Wf : float          = 1.27                                  # [m] Front track width
-    Wr : float          = 1.24                                  # [m] Rear track width
-    lx : float          = 0.015                                 # [m] Tire relaxation length, for longitudinal slip dynamics (it was 0.3)
-    ly : float          = 0.015                                 # [m] Tire relaxation length, for lateral slip dynamics (it was 0.3)
+    Wr : float          = 1.21                                  # [m] Rear track width
+    lx : float          = 0.3                                   # [m] Tire relaxation length, for longitudinal slip dynamics (it was 0.3)
+    ly : float          = 0.3                                   # [m] Tire relaxation length, for lateral slip dynamics (it was 0.3)
 # Inertia and mass
-    m : float           = 315                                   # [kg] Total mass of the vehicle + driver : float = 245 + 70 : float = 315 kg
-    i_xx : float        = 85                                    # [kg*m^2] Moment of inertia of the vehicle w.r.t. x axis
-    i_yy : float        = 850                                   # [kg*m^2] Moment of inertia of the vehicle w.r.t. y axis
-    i_zz : float        = 800                                   # [kg*m^2] Moment of inertia of the vehicle w.r.t. z axis
-    i_xz : float        = 200                                   # [kg*m^2] Product of inertia of the vehicle
+    m : float           = 276                                   # [kg] Total mass of the vehicle + driver : float = 245 + 70 : float = 315 kg
+    i_xx : float        = 27.96                                 # [kg*m^2] Moment of inertia of the vehicle w.r.t. x axis
+    i_yy : float        = 89.74                                 # [kg*m^2] Moment of inertia of the vehicle w.r.t. y axis
+    i_zz : float        = 96.13                                 # [kg*m^2] Moment of inertia of the vehicle w.r.t. z axis
+    i_xz : float        = 7.50                                  # [kg*m^2] Product of inertia of the vehicle
 # Areodynamics
     Front_area : float  = 1.0                                   # [m^2] Frontal area
     rho : float         = 1.225                                 # [kg/m^3] Air density
