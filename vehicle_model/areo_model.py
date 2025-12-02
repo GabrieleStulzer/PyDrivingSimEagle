@@ -9,8 +9,9 @@ def areo_model(u, params):
     CAx  = params.vehicle.CAx
     CAzf = params.vehicle.CAzf
     CAzr = params.vehicle.CAzr
+    CV = params.vehicle.cv
 
-    FAxc   = CAx * u**2
+    FAxc   = CAx * u**2 + CV*u
     FAz__r = CAzr * u**2
     FAz__f = CAzf * u**2
     

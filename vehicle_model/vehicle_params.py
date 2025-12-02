@@ -85,7 +85,7 @@ class WheelData:
 
 @dataclass
 class TransmissionData:
-    tau_red : float       = 52/15                                 # [-] Transmission ratio of the gearbox
+    tau_red : float  = 52/15                                 # [-] Transmission ratio of the gearbox
     eff_red : float  = 0.93                                  # [-] Efficiency of the gearbox
 
 # ----------------------------------------------------------------
@@ -174,9 +174,15 @@ class VehicleData():
     i_zz : float        = 800                                   # [kg*m^2] Moment of inertia of the vehicle w.r.t. z axis
     i_xz : float        = 200                                   # [kg*m^2] Product of inertia of the vehicle
 # Areodynamics
-    CAx : float         = 1.5563680                             # [N*s^2/m^2] Aero drag coefficient
-    CAzf : float        = 0.6412236160                          # [N*s^2/m^2] Aero downforce coeff at front axle
-    CAzr : float        = 0.9151443840                          # [N*s^2/m^2] Aero downforce coeff at rear axle
+    Front_area : float  = 1.0                                   # [m^2] Frontal area
+    rho : float         = 1.225                                 # [kg/m^3] Air density
+    cd : float          = 1                                     # [-] Drag coefficient
+    cl : float          = 2.18                                  # [-] Lift coefficient
+    cv : float          = 5.53                                  # [-] viscous coefficient coefficient
+    epsilon : float     = 0.53                                  # [-] Ripartition factor downforce front/rear axle
+    CAx : float         = 0.5*cd*rho*Front_area                 # [N*s^2/m^2] Aero drag coefficient
+    CAzf : float        = 0.5*epsilon*Front_area*rho*cl         # [N*s^2/m^2] Aero downforce coeff at front axle
+    CAzr : float        = 0.5*(1-epsilon)*Front_area*rho*cl     # [N*s^2/m^2] Aero downforce coeff at rear axle
 # Low velocity tire correction
     Vlow_long : float   = 4                                     # [m/s] speed threshold to use low-speed corrections in the tire longit slip and force models
     Vlow_lat : float    = 4                                     # [m/s] speed threshold to use low-speed corrections in the tire lateral slip and force models
