@@ -17,17 +17,33 @@ import math
 
 # SUSPENSIONS
 @dataclass
-class SuspensionData:
-    Ks : float          = ((26000)**(-1) + (100*10**3)**(-1))**(-1) # [N/m] Suspension+tire
-    Cs : float          = 2125                                  # [N*s/m] Suspension damping
-    Cs_b : float        = 1750                                  # [N*s/m] Suspension damping bound
-    Cs_r : float        = 2500                                  # [N*s/m] Suspension damping rebound
+class SuspensionData_r:
+    Ks : float          = ((39404)**(-1) + (100*10**3)**(-1))**(-1) # [N/m] Suspension+tire
+    Cs : float          = 1300                                  # [N*s/m] Suspension damping
+    Cs_b : float        = 1300                                  # [N*s/m] Suspension damping bound
+    Cs_r : float        = 1250                                  # [N*s/m] Suspension damping rebound
     Karb : float        = 0                                     # [Nm/rad] Anti-roll bar stiffness
-    stroke : float      = 0.06                                  # [m] Maximum damper stroke
+    stroke : float      = 0.052                                 # [m] Maximum damper stroke
     K_es : float        = 50000                                 # [N/m] Damper's end-stops stiffness
     C_es : float        = 2000                                  # [N*s/m] Rear damper's end-stops damping
-    h_rc : float        = 0.033                                 # [m] Rear roll center height
-    z__rlx : float      = 0.175                                 # [m] Spring free length
+    h_rc : float        = 0.0495                                # [m] Rear roll center height
+    z__rlx : float      = 0.194                                 # [m] Spring free length
+    reg_fact : float    = 1e5                                   # [1/m] Regularized sign steepness factor (equal for front and rear)
+    camber_gain: float  = 0.997836                              # [-] camber gain constant (linear fitting from suspension kinematic model)
+    tau_N : float       = 0.06                                  # [s] time constant for the vertical loads dynamics
+
+@dataclass
+class SuspensionData_f:
+    Ks : float          = ((39404)**(-1) + (100*10**3)**(-1))**(-1) # [N/m] Suspension+tire
+    Cs : float          = 1300                                  # [N*s/m] Suspension damping
+    Cs_b : float        = 1300                                  # [N*s/m] Suspension damping bound
+    Cs_r : float        = 1250                                  # [N*s/m] Suspension damping rebound
+    Karb : float        = 0                                     # [Nm/rad] Anti-roll bar stiffness
+    stroke : float      = 0.052                                 # [m] Maximum damper stroke
+    K_es : float        = 50000                                 # [N/m] Damper's end-stops stiffness
+    C_es : float        = 2000                                  # [N*s/m] Rear damper's end-stops damping
+    h_rc : float        = 0.02                                  # [m] Rear roll center height
+    z__rlx : float      = 0.194                                 # [m] Spring free length
     reg_fact : float    = 1e5                                   # [1/m] Regularized sign steepness factor (equal for front and rear)
     camber_gain: float  = 0.997836                              # [-] camber gain constant (linear fitting from suspension kinematic model)
     tau_N : float       = 0.06                                  # [s] time constant for the vertical loads dynamics
@@ -41,16 +57,21 @@ class SuspensionData:
 # ----------------------------------------------------------------
 
 # CHASSIS (including all the sprung mass)
+
+# =================================================================================================
+#                                       SISTEMATO
+# =================================================================================================
+
 @dataclass
 class ChassisData:
 # Inertia tensor for the chassis
 # is =  |  is_xx   0   -is_xz |
 #       |    0   is_yy    0   |
 #       | -is_xz   0    is_zz |
-    is_xx : float       = 0.9*85                                # [kg*m^2] chassis moment of inertia about x axis
-    is_yy : float       = 0.9*850                               # [kg*m^2] chassis moment of inertia about y axis
-    is_zz : float       = 0.9*800                               # [kg*m^2] chassis moment of inertia about z axis
-    is_xz : float       = 0.9*60                                # [kg*m^2] chassis product of inertia xz
+    is_xx : float       = 18.66                                 # [kg*m^2] chassis moment of inertia about x axis
+    is_yy : float       = 74.26                               # [kg*m^2] chassis moment of inertia about y axis
+    is_zz : float       = 72.75                               # [kg*m^2] chassis moment of inertia about z axis
+    is_xz : float       = 6.72                                # [kg*m^2] chassis product of inertia xz
 
 # ----------------------------------------------------------------
 #  _   _                                   ___       _
@@ -61,19 +82,39 @@ class ChassisData:
 # ----------------------------------------------------------------
 
 # UNSRPUNG BODY IS MADE OF 4 WHEELS, SUSPENSIONS, TRANSMISSION AND BRAKE MASSES
+
+# =================================================================================================
+#                                       SISTEMATO
+# =================================================================================================
+
 @dataclass
-class WheelData:
+class WheelData_f:
 # Inertia tensor of the wheel
 # iwd = | iwd   0  0  |
 #       |  0  iwa  0  |
 #       |  0   0  iwd |
     R : float           = 0.203                                 # [m] Wheel Radius
-    width : float       = 6*25.4*10**(-3)                       # [m] Wheel width
-    mass : float        = 8                                     # [kg] Wheel mass
-    iwd : float         = mass / 12 * (3 * R ** 2 + width ** 2) # [kg*m^2] Inertia of the wheel
-    iwa : float         = 0.5                                   # [kg*m^2] Inertia of the whole wheel assembly
-    static_camber :float= 1.5                                   # [deg] Static camber for rear wheels
+    width : float       = 0.124                                 # [m] Wheel width
+    mass : float        = 7.2                                   # [kg] Wheel mass
+    iwd : float         = 0.145                                 # [kg*m^2] Inertia of the wheel
+    iwa : float         = 0.079                                 # [kg*m^2] Inertia of the whole wheel assembly
+    static_camber :float= -1                                    # [deg] Static camber for rear wheels
+    static_toe : float  = 0.35                                  # [deg] Static toe for front wheels
 
+
+@dataclass
+class WheelData_r:
+# Inertia tensor of the wheel
+# iwd = | iwd   0  0  |
+#       |  0  iwa  0  |
+#       |  0   0  iwd |
+    R : float           = 0.203                                 # [m] Wheel Radius
+    width : float       = 0.15                                  # [m] Wheel width
+    mass : float        = 7.8                                   # [kg] Wheel mass
+    iwd : float         = 0.137                                 # [kg*m^2] Inertia of the wheel
+    iwa : float         = 0.094                                 # [kg*m^2] Inertia of the whole wheel assembly
+    static_camber :float= 0.3                                   # [deg] Static camber for rear wheels
+    static_toe : float  = 0.33                                  # [deg] Static toe for rear wheels
 
 # ----------------------------------------------------------------
 #   _____                       _       _            ___       _
@@ -83,9 +124,14 @@ class WheelData:
 #
 # ----------------------------------------------------------------
 
+# =================================================================================================
+#                                       SISTEMATO
+# =================================================================================================
+
+
 @dataclass
 class TransmissionData:
-    tau_red : float  = 52/15                                 # [-] Transmission ratio of the gearbox
+    tau_red : float  = 4.5                                   # [-] Transmission ratio of the gearbox
     eff_red : float  = 0.93                                  # [-] Efficiency of the gearbox
 
 # ----------------------------------------------------------------
@@ -95,10 +141,17 @@ class TransmissionData:
 #  |___/\__\___\___|_| |_|_||_\__, | |___/\_, /__(_) |___/\__,_|\__\__,_|
 #                             |___/       |__/
 # ----------------------------------------------------------------
+# STEERING SYSTEM
+
+# =================================================================================================
+#                                       SISTEMATO
+# =================================================================================================
+
+
 @dataclass
 class SteeringSystemData:
-    tau_D : float       = 10 #3.67                              # [-] Steering transmission ratio (pinion-rack)
-    tau_H : float       = 0.03                                  # [s] Time constant for steering wheel dynamics
+    tau_D : float       = 4.588 #3.67                           # [-] Steering transmission ratio (pinion-rack)
+    tau_H : float       = 0.7                                  # [s] Time constant for steering wheel dynamics
 
 # # ----------------------------------------------------------------
 #   ___          _   _             ___       _
@@ -108,6 +161,11 @@ class SteeringSystemData:
 #                          |___/
 # ----------------------------------------------------------------
 # Braking system
+
+# =================================================================================================
+#                                       SISTEMATO
+# =================================================================================================
+
 @dataclass
 class BrakingSystemData:
     totBrakeTorque : float          = 750                       # [Nm] max total brake torque that the braking system can develop (it is then split btween front/rear axles)
@@ -117,7 +175,7 @@ class BrakingSystemData:
     n_p_f : int                     = 4                         # [-] number of front brake pistons
     r_p_f : float                   = 69*1e-3                   # [m] front brake piston effective radius
     mu_f : float                    = 0.42                      # [-] front brake pads/rotor friction coefficient
-    R_pp_f : float                  = 0.0756                      # [m] Front pressure point arm
+    R_pp_f : float                  = 0.0756                    # [m] Front pressure point arm
     max_brake_torque_front : float  = totBrakePressure*math.pi*R_pp_f*mu_f*n_p_f*(d_p_f**2)/4    # [Nm] max front braking torque that the hydraulic system can provide
     # rear
     d_p_r : float                   = 0.025                     # [m] rear brake piston diameter
@@ -132,6 +190,8 @@ class BrakingSystemData:
     tau_br : float                  = 0.03                      # [s] time constant for brake actuation dynamics
     regularSignScale : float        = 1                         # [rad/s] scale parameter for the regularized sign function
 
+
+
 # ----------------------------------------------------------------
 #  __  __     _               ___
 # |  \/  |___| |_  ___  _ _  |   \ __ _| |_ __ _
@@ -139,16 +199,22 @@ class BrakingSystemData:
 # |_|  |_\___/\_ |\___/|_|   |___/\__,_|\__\__,_|
 #
 # ----------------------------------------------------------------
+# ELECTRIC MOTOR
+# =================================================================================================
+#                                       SISTEMATO
+# =================================================================================================
+
+
 
 @dataclass
 class MotorData:
 # Electric motor parameters (motor model: Emrax 208, with Chimera Evoluzione powertrain)
-    maxTorque : float               = 80                        # [Nm] max torque that the motor can provide
-    speedForTorqueCut : float       = 4800                      # [rpm] motor rotational speed at which torque is decreased a lot
-    maxRotSpeed : float             = 5200                      # [rpm] max rotational speed of the motor
-    k_torque : float                = 0.83                      # [-] motor torque constant
-    I_max : float                   = 100                       # [A] max motor current
-    tau_mot : float                 = 0.03                      # [s] time constant for motor actuation dynamics
+    maxTorque : float               = 100                       # [Nm] max torque that the motor can provide
+    speedForTorqueCut : float       = 5450                      # [rpm] motor rotational speed at which torque is decreased a lot
+    maxRotSpeed : float             = 8000                      # [rpm] max rotational speed of the motor
+    k_torque : float                = 0.39                      # [-] motor torque constant
+    I_max : float                   = 195                       # [A] max motor current
+    tau_mot : float                 = 0.024                     # [s] time constant for motor actuation dynamics
     tau_ped : float                 = 0.03                      # [s] time constant for pedal dynamics
 
 # ----------------------------------------------------------------
@@ -159,8 +225,14 @@ class MotorData:
 #                            |__/ 
 # ----------------------------------------------------------------
 @dataclass
+
+# =================================================================================================
+#                                       SISTEMATO
+# =================================================================================================
+
+
 class AccumulatorData:
-    maxPower : float                = 75                        # [kW] max output power for the battery pack
+    maxPower : float                = 80                        # [kW] max output power for the battery pack
 
 
 # ----------------------------------------------------------------
@@ -170,6 +242,10 @@ class AccumulatorData:
 #   \___/ \_/\___|_| \__,_|_|_|   \_/\___|_||_|_\__|_\___| |___/\__,_|\__\__,_|
 #
 # ----------------------------------------------------------------
+
+# =================================================================================================
+#                                       SISTEMATO
+# =================================================================================================
 
 @dataclass
 class VehicleData():
@@ -202,6 +278,7 @@ class VehicleData():
     Vlow_long : float   = 4                                     # [m/s] speed threshold to use low-speed corrections in the tire longit slip and force models
     Vlow_lat : float    = 4                                     # [m/s] speed threshold to use low-speed corrections in the tire lateral slip and force models
 
+
 # ----------------------------------------------------------------
 #
 # ██╗   ██╗███████╗██╗  ██╗██╗ ██████╗██╗     ███████╗
@@ -223,14 +300,10 @@ class VehicleParams():
                  braking_system = BrakingSystemData(),
                  motor = MotorData(),
                  accumulator = AccumulatorData(),
-                 front_wheel = WheelData(static_camber = 3),
-                 rear_wheel = WheelData(),
-                 front_suspension = SuspensionData(
-                    Ks = ((20000)**(-1) + (100*10**3)**(-1))**(-1),
-                    Karb = 195.4*180/math.pi,
-                    h_rc = 0.056
-                 ),
-                 rear_suspension = SuspensionData()
+                 front_wheel = WheelData_f(),
+                 rear_wheel = WheelData_r(),
+                 front_suspension = SuspensionData_f(),
+                 rear_suspension = SuspensionData_r()
                  ):
         self.vehicle            = vehile
         self.chassis            = chassis

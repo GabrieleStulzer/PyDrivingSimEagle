@@ -18,11 +18,12 @@ def brake_model( reqBrakeTorque, omega_r, omega_l, max_brake_torque, params ):
     # Use regularized sign functions (sin(atan(.))) to make sure that the 
     # vehicle correctly stops at zero forward speed, to avoid that negative 
     # speed values could be reached during braking
+    # Compute braking torques at rear wheels
     if fabs(reqBrakeTorque) <= fabs(max_brake_torque):
-        Tw_r = reqBrakeTorque * sin( atan( omega_r / regularSignScale ) )
-        Tw_l = reqBrakeTorque * sin( atan( omega_l / regularSignScale ) )
+        Tw_r = reqBrakeTorque * sin( atan( omega_r / regularSignScale ) )/2.0 # Conferma che sia
+        Tw_l = reqBrakeTorque * sin( atan( omega_l / regularSignScale ) )/2.0 # da dividere per 2
     else:
-        Tw_r = -max_brake_torque * sin( atan( omega_r / regularSignScale ) )
-        Tw_l = -max_brake_torque * sin( atan( omega_l / regularSignScale ) )
+        Tw_r = -max_brake_torque * sin( atan( omega_r / regularSignScale ) )/2.0
+        Tw_l = -max_brake_torque * sin( atan( omega_l / regularSignScale ) )/2.0
 
     return Tw_r, Tw_l
