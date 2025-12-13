@@ -38,3 +38,7 @@ To solve it follow this procedure (https://techcommunity.microsoft.com/t5/window
 5. It is also necessary to create a .xsession file in the user's home directory:
   `echo xfce4-session > ~/.xsession`
 6. Finally run: `sudo apt-get update`
+
+## Sinusoidal track scenario
+`simulator.py` now instantiates the `SinusoidalTrack` scenario by default. The scenario drops cones along a sinusoidal centerline and runs a very lightweight controller that modulates both steering and speed, so you can exercise lateral and longitudinal logic in one place.  
+You can tweak the amplitude, wavelength, length, and speed limits directly in `SinusoidalTrack` inside `scenarios/main_scenarios.py`, or swap back to any of the older scenarios by uncommenting the relevant lines in `simulator.py`.
