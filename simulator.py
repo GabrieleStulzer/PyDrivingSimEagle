@@ -19,8 +19,8 @@ def main():
     # Enable this to test only single vehicle
     # av = OnlyVehicle()
     # av = AutonomousVehicle()
-    # av = SinusoidalTrack()
-    av = HalfCircleTrack(radius=30.0, straight_length=20.0, track_width=5.0, cone_spacing=3.0)
+    av = SinusoidalTrack()
+    # av = HalfCircleTrack(radius=30.0, straight_length=20.0, track_width=5.0, cone_spacing=3.0)
     # av = CircuitTrackScenario.oval(straight_length=80, turn_radius=25, track_width=5.0, cone_spacing=3.0, max_speed=12.0)
     #BasicTrafficLight()
     # Enable this to test the coins
