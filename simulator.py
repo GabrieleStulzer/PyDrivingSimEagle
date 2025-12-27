@@ -1,11 +1,10 @@
 # Authors : Gastone Pietro Rosati Papini
 # Date    : 09/08/2022
 # License : MIT
-import math
 import signal
 
 from pydrivingsim import World
-from scenarios import BasicSpeedLimit, BasicTrafficLight, OnlyVehicle, AutonomousVehicle, GetTheCoins, SinusoidalTrack
+from scenarios import BasicSpeedLimit, BasicTrafficLight, OnlyVehicle, AutonomousVehicle, GetTheCoins, SinusoidalTrack, HalfCircleTrack, CircuitTrackScenario
 
 class GracefulKiller:
   kill_now = False
@@ -18,9 +17,11 @@ class GracefulKiller:
 
 def main():
     # Enable this to test only single vehicle
-    #av = OnlyVehicle()
-    #av = AutonomousVehicle()
-    av = SinusoidalTrack()
+    # av = OnlyVehicle()
+    # av = AutonomousVehicle()
+    # av = SinusoidalTrack()
+    av = HalfCircleTrack(radius=30.0, straight_length=20.0, track_width=5.0, cone_spacing=3.0)
+    # av = CircuitTrackScenario.oval(straight_length=80, turn_radius=25, track_width=5.0, cone_spacing=3.0, max_speed=12.0)
     #BasicTrafficLight()
     # Enable this to test the coins
     #GetTheCoins()
