@@ -1,5 +1,5 @@
 # The basic scenarios
-from scenarios.main_scenarios import AutonomousVehicle, OnlyVehicle, BasicSpeedLimit, BasicTrafficLight, GetTheCoins, SinusoidalTrack, HalfCircleTrack
+from scenarios.main_scenarios import AutonomousVehicle, OnlyVehicle, BasicSpeedLimit, BasicTrafficLight, GetTheCoins, SinusoidalTrack, HalfCircleTrack, ExcitationDriver, SinusoidalAccelDriver, SinusoidalAccelerationFixedSteerDriver
 
 # Circuit track scenarios
 from scenarios.circuit_track import CircuitTrack, CircuitTrackController, CircuitTrackScenario

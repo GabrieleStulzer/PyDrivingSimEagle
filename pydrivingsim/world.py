@@ -26,6 +26,7 @@ class World(metaclass=Singleton):
         pygame.display.init()
         self.screen = pygame.display.set_mode( (self.__metadata["screen_size"][0], self.__metadata["screen_size"][1]) )
         self.backgorund = pygame.image.load("imgs/bg.jpeg")
+        self._bg_size = self.backgorund.get_size()
 
         # Video information
         self.scaling_factor = self.__metadata["screen_size"][0] / self.__metadata["world_in_screen"]
@@ -62,7 +63,13 @@ class World(metaclass=Singleton):
         screen_x_pos = self.bg_pos[0] - self.world_pos[0] * self.scaling_factor + self.__metadata["screen_size"][0] / 2
         # the minus sign there is because the graph y axis points downward.
         screen_y_pos = self.bg_pos[1] + self.world_pos[1] * self.scaling_factor + self.__metadata["screen_size"][1] / 2
-        self.screen.blit(self.backgorund, (screen_x_pos,screen_y_pos))
+        bg_w, bg_h = self._bg_size
+        screen_w, screen_h = self.__metadata["screen_size"]
+        start_x = int(screen_x_pos % bg_w) - bg_w
+        start_y = int(screen_y_pos % bg_h) - bg_h
+        for x in range(start_x, screen_w, bg_w):
+            for y in range(start_y, screen_h, bg_h):
+                self.screen.blit(self.backgorund, (x, y))
         for obj in self.obj_list:
             obj.render()
 
