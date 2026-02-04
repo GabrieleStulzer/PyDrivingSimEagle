@@ -110,6 +110,7 @@ class Agent():
         s.YawRateFild = self.YawRateFild/self.num_of_step
         s.SteerWhlAg = self.SteerWhlAg/self.num_of_step
         s.RequestedCruisingSpeed = self.requested_cruising_speed
+  
 
         if self.track is not None:
             road_width = self.track.track_width
@@ -128,11 +129,41 @@ class Agent():
                 )
             self._last_s = s_proj
 
-            heading_error = track_heading - v.state[2]
+            heading_error =  track_heading - v.state[2]
             heading_error = atan2(sin(heading_error), cos(heading_error))
 
             s.LaneHeading = heading_error
             s.LaneCrvt = self.track.curvature(s_proj)
+
+            # Preview points at 1m, 2m, 4m ahead for lateral/heading error
+            preview_distances = [1.0, 2.0, 4.0]
+            preview_idx = 0 
+            
+            for distance in preview_distances:
+                s_preview = s_proj + distance
+                x_preview, y_preview, heading_preview, kappa_preview = self.track.reference_at(s_preview)
+                
+                # Calculate lateral error at preview point
+                delta_x = x_preview - v.state[0]
+                delta_y = y_preview - v.state[1]
+                lateral_error_preview = -delta_x * sin(heading_preview) + delta_y * cos(heading_preview)
+                
+                # Calculate heading error at preview point
+                heading_error_preview = heading_preview - v.state[2]
+                heading_error_preview = atan2(sin(heading_error_preview), cos(heading_error_preview))
+                
+                s.Lateral_error[preview_idx] = lateral_error_preview
+                s.Heading_error[preview_idx] = heading_error_preview
+                preview_idx += 1
+
+            # Curvature preview: sample 100 points ahead along track
+            curvature_spacing = 1.0  # 1 meter spacing
+            for i in range(100):
+                s_ahead = s_proj + i * curvature_spacing
+                _, _, _, kappa = self.track.reference_at(s_ahead)
+                s.AdasisCurvatureDist[i] = i * curvature_spacing
+                s.AdasisCurvatureValues[i] = kappa
+            s.AdasisCurvatureNr = 100
 
             # Keep legacy sign convention used by the C++ controller:
             # lane offsets average should be positive when vehicle is right of center.
@@ -274,8 +305,7 @@ class Agent():
         # print("Status = " + str(m.Status))
         # print("CycleNumber = " + str(m.CycleNumber))
         # print("RequestedAcc = " + str(m.RequestedAcc))
-
-        #self.action = (0.01, 0.01)
+        
         self.action = (m.RequestedAcc,m.RequestedSteerWhlAg)
 
     def terminate(self):
@@ -284,7 +314,7 @@ class Agent():
         self.cycle_number += 1
         self.scenario_msg.CycleNumber = self.cycle_number
         self.scenario_msg.TimeStamp = ct.c_double(datetime.timestamp(datetime.now()))
-        self.scenario_msg.ECUupTime = World().time;
+        self.scenario_msg.ECUupTime = World().time
         self.scenario_msg.Status = 1
 
         c.client_agent_compute(self.scenario_msg_pointer, self.manoeuvre_msg_pointer)

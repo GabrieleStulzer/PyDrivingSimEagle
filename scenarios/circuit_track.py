@@ -537,6 +537,14 @@ class CircuitTrackScenario:
         return cls(track, **kwargs)
 
     @classmethod
+    def complex_oval(cls, straight_length: float = 80.0, turn_radius: float = 25.0,
+                     track_width: float = 5.0, **kwargs):
+        """Create a complex oval track scenario with multiple curves and chicanes."""
+        from scenarios.circuit_presets import create_complex_oval
+        track = create_complex_oval(straight_length, turn_radius, track_width)
+        return cls(track, **kwargs)
+
+    @classmethod
     def figure_eight(cls, size: float = 50.0, track_width: float = 5.0, **kwargs):
         """Create a figure-8 track scenario."""
         from scenarios.circuit_presets import create_figure_eight_track
@@ -544,10 +552,125 @@ class CircuitTrackScenario:
         return cls(track, **kwargs)
 
     @classmethod
-    def racetrack(cls, scale: float = 1.0, track_width: float = 5.0, **kwargs):
+    def racetrack(cls, straight_length: float = 80.0, turn_radius: float = 25.0,
+                  track_width: float = 5.0, **kwargs):
         """Create a more complex racetrack scenario."""
         from scenarios.circuit_presets import create_racetrack
-        track = create_racetrack(scale, track_width)
+        track = create_racetrack(straight_length, turn_radius, track_width)
+        return cls(track, **kwargs)
+
+    @classmethod
+    def f_shaped(cls, scale: float = 80.0, track_width: float = 5.0, **kwargs):
+        """
+        Create an F-shaped racing circuit scenario.
+        
+        Features a professional-style layout with:
+        - Long main straight
+        - Top horizontal section
+        - Middle horizontal section (F's middle bar)
+        - Technical turns and return section
+        
+        Args:
+            scale: Overall size scaling factor in meters (default: 80).
+            track_width: Full width of track in meters (default: 5).
+            **kwargs: Additional arguments passed to scenario constructor.
+        
+        Returns:
+            CircuitTrackScenario instance.
+        """
+        from scenarios.circuit_presets import create_f_shaped_track
+        track = create_f_shaped_track(scale, track_width)
+        return cls(track, **kwargs)
+
+    @classmethod
+    def from_fsg_file(cls, filepath: str, track_width: float = 5.0, 
+                     segment_length: float = 5.0, **kwargs):
+        """
+        Create a circuit scenario from FSG format data file.
+        
+        Loads a track from a file containing curvature and centerline data.
+        The file format should have columns for:
+        - abscissa (distance along track)
+        - curvature
+        - dir_mid_line (heading)
+        - x_mid_line, y_mid_line (coordinates)
+        
+        Args:
+            filepath: Path to the FSG.txt file.
+            track_width: Full width of track in meters (default: 5).
+            segment_length: Length of each clothoid segment for approximation (default: 5m).
+            **kwargs: Additional arguments passed to scenario constructor.
+        
+        Returns:
+            CircuitTrackScenario instance.
+        
+        Example:
+            scenario = CircuitTrackScenario.from_fsg_file(
+                "../race-sim/FSG.txt",
+                track_width=5.0,
+                segment_length=10.0
+            )
+        """
+        from scenarios.circuit_presets import create_track_from_fsg_file
+        track = create_track_from_fsg_file(filepath, track_width, segment_length)
+        return cls(track, **kwargs)
+
+    @classmethod
+    def circuit(cls, filepath: str, track_width: float = 5.0, 
+                segment_length: float = 5.0, **kwargs):
+        """
+        Create a circuit scenario from a data file.
+        
+        Generic method to load any track from a file with curvature and centerline data.
+        Supports FSG format with columns: abscissa, curvature, dir_mid_line, x_mid_line, y_mid_line.
+        
+        Args:
+            filepath: Path to the circuit data file (e.g., "scenarios/FSG.txt", "scenarios/Varano.txt").
+            track_width: Full width of track in meters (default: 5).
+            segment_length: Length of each clothoid segment for approximation (default: 5m).
+            **kwargs: Additional arguments passed to scenario constructor (e.g., cone_spacing).
+        
+        Returns:
+            CircuitTrackScenario instance.
+        
+        Examples:
+            # Load FSG (Barcelona) circuit
+            scenario = CircuitTrackScenario.circuit("scenarios/FSG.txt", track_width=5.0, cone_spacing=5.0)
+            
+            # Load Varano circuit
+            scenario = CircuitTrackScenario.circuit("scenarios/Varano.txt", track_width=5.0, cone_spacing=5.0)
+            
+            # Load any custom circuit file
+            scenario = CircuitTrackScenario.circuit("path/to/mycircuit.txt", track_width=6.0, segment_length=10.0)
+        """
+        from scenarios.circuit_presets import create_track_from_fsg_file
+        track = create_track_from_fsg_file(filepath, track_width, segment_length)
+        return cls(track, **kwargs)
+
+    @classmethod
+    def varano(cls, track_width: float = 5.0, segment_length: float = 5.0, **kwargs):
+        """
+        Create Varano racing circuit scenario.
+        
+        Loads the Varano circuit from the Varano.txt data file.
+        
+        Args:
+            track_width: Full width of track in meters (default: 5).
+            segment_length: Length of each clothoid segment for approximation (default: 5m).
+            **kwargs: Additional arguments passed to scenario constructor.
+        
+        Returns:
+            CircuitTrackScenario instance of Varano circuit.
+        
+        Example:
+            scenario = CircuitTrackScenario.varano(
+                track_width=5.0,
+                segment_length=10.0,
+                cone_spacing=5.0
+            )
+        """
+        from scenarios.circuit_presets import create_varano_track
+        track = create_varano_track(track_width, segment_length)
         return cls(track, **kwargs)
 
     @classmethod

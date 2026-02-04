@@ -180,7 +180,7 @@ class ExcitationDriver():
 
 class SinusoidalAccelDriver():
     def __init__(self,
-                 steer_amplitude=0.3,
+                 steer_amplitude=0.2,
                  steer_frequency=0.2,
                  steer_phase=0.0,
                  steer_ramp_time=2.0,
@@ -188,7 +188,7 @@ class SinusoidalAccelDriver():
                  pedal_gain=0.3,
                  pedal_range=(-0.6, 0.8),
                  steer_limit=0.5,
-                 start_speed=0.0):
+                 start_speed=4):
         self.vehicle = Vehicle()
         self.vehicle.set_screen_here()
         self.vehicle.set_pos_ang((0, -1, 0))

@@ -22,10 +22,17 @@ def main():
     # av = AutonomousVehicle()
     # av = SinusoidalTrack()
     # av = ExcitationDriver()
-    av = SinusoidalAccelDriver(steer_amplitude=0.8, steer_frequency=0.2, accel_mps2=0.22, pedal_gain=0.1)
+    # av = SinusoidalAccelDriver(steer_amplitude=0.6, steer_frequency=0.05, accel_mps2=0.0, pedal_gain=0.2, start_speed=5)
     # av = SinusoidalAccelerationFixedSteerDriver()
     # av = HalfCircleTrack(radius=30.0, straight_length=20.0, track_width=5.0, cone_spacing=3.0)
-    # av = CircuitTrackScenario.oval(straight_length=80, turn_radius=25, track_width=5.0, cone_spacing=3.0, max_speed=12.0)
+    # av = CircuitTrackScenario.racetrack(radius=30.0, straight_length=20.0, track_width=5.0, cone_spacing=3.0)
+    # av = CircuitTrackScenario.f_shaped(scale=80.0, track_width=5.0, cone_spacing=3.0)
+    
+    # Load circuit from file - you can use any of these:
+    av = CircuitTrackScenario.circuit("scenarios/FSG.txt", track_width=5.0, segment_length=0.02, cone_spacing=5.0)
+    # av = CircuitTrackScenario.circuit("scenarios/FSG.txt", track_width=5.0, segment_length=2.0, cone_spacing=5.0)
+    # av = CircuitTrackScenario.varano(track_width=5.0, segment_length=2.0, cone_spacing=5.0)  # Alternative for Varano
+    
     #BasicTrafficLight()
     # Enable this to test the coins
     #GetTheCoins()

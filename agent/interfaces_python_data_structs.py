@@ -38,6 +38,8 @@ class input_data_str(ct.Structure):
 		("AdasisCurvatureNr", ct.c_int32),
 		("AdasisCurvatureDist", ct.c_double*100),
 		("AdasisCurvatureValues", ct.c_double*100),
+		("Heading_error", ct.c_double*100),
+		("Lateral_error", ct.c_double*100),
 		("AdasisSpeedLimitNr", ct.c_int32),
 		("AdasisSpeedLimitDist", ct.c_double*10),
 		("AdasisSpeedLimitValues", ct.c_int32*10),
@@ -48,7 +50,11 @@ class input_data_str(ct.Structure):
 		("TrfLightFirstNextState", ct.c_int32),
 		("TrfLightSecondTimeToChange", ct.c_double),
 		("TrfLightSecondNextState", ct.c_int32),
-		("TrfLightThirdTimeToChange", ct.c_double)
+		("TrfLightThirdTimeToChange", ct.c_double),
+		("alpha_rr", ct.c_double),
+		("alpha_rl", ct.c_double),
+		("alpha_fr", ct.c_double),
+		("alpha_fl", ct.c_double)
 	]
 class output_data_str(ct.Structure):
     _pack_ = 1

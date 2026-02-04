@@ -6,6 +6,7 @@ defined using pyclothoids segments.
 """
 
 import math
+import os
 from typing import List, Tuple
 
 from pyclothoids import Clothoid
@@ -66,6 +67,118 @@ def create_oval_track(straight_length: float = 80.0,
     return CircuitTrack(segments, track_width)
 
 
+def create_complex_oval(straight_length: float = 80.0,
+                        turn_radius: float = 25.0,
+                        track_width: float = 5.0) -> CircuitTrack:
+    """
+    Create a complex oval track with multiple curves and chicanes.
+
+    Similar to oval track but with additional technical sections:
+    - Long main straight
+    - Fast sweeping turn
+    - Medium straight with chicane
+    - Technical section
+    - Back straight
+    - Final turns to close the loop
+
+    Guaranteed closure with properly calculated angles.
+
+    Args:
+        straight_length: Length of straight sections in meters.
+        turn_radius: Base radius of turns in meters.
+        track_width: Full width of track in meters.
+
+    Returns:
+        CircuitTrack instance.
+    """
+    segments = []
+    x, y, theta = 0.0, 0.0, 0.0
+
+    # Segment 1: Long main straight (start/finish)
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, straight_length * 2.0)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+
+    # Segment 2: Turn 1 - Right 60° (sweeping)
+    angle = math.pi / 3  # 60 degrees
+    kappa = 1.0 / (turn_radius * 1.8)
+    arc_length = angle * turn_radius * 1.8
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+
+    # Segment 3: Short straight
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, straight_length * 0.7)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+
+    # Segment 4: Turn 2 - Right 60° (continue)
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+
+    # Segment 5: Medium straight (before chicane)
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, straight_length * 0.8)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+
+    # Segment 6: Chicane - Left 30°
+    angle_chicane = math.pi / 6  # 30 degrees
+    kappa_chicane = -1.0 / (turn_radius * 1.5)
+    arc_chicane = angle_chicane * turn_radius * 1.5
+    seg = Clothoid.StandardParams(x, y, theta, kappa_chicane, 0.0, arc_chicane)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+
+    # Segment 7: Chicane - Right 30° (back)
+    kappa_chicane = 1.0 / (turn_radius * 1.5)
+    seg = Clothoid.StandardParams(x, y, theta, kappa_chicane, 0.0, arc_chicane)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+
+    # Segment 8: Straight section
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, straight_length * 0.9)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+
+    # Segment 9: Turn 3 - Right 60°
+    angle = math.pi / 3
+    kappa = 1.0 / (turn_radius * 1.3)
+    arc_length = angle * turn_radius * 1.3
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+
+    # Segment 10: Back straight
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, straight_length * 1.5)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+
+    # Segment 11: Turn 4 - Right 60° (technical)
+    kappa = 1.0 / turn_radius
+    arc_length = angle * turn_radius
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+
+    # Segment 12: Short straight
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, straight_length * 0.6)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+
+    # Segment 13: Turn 5 - Right 60° (final turn to close)
+    # Total angles: 60 + 60 + 60 + 60 + 60 = 300° from right turns
+    #               -30 + 30 = 0° from chicane
+    # Need 60° more to make 360°
+    angle = math.pi / 3
+    kappa = 1.0 / (turn_radius * 1.4)
+    arc_length = angle * turn_radius * 1.4
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+
+    return CircuitTrack(segments, track_width)
+
+
 def create_figure_eight_track(size: float = 50.0,
                               track_width: float = 5.0) -> CircuitTrack:
     """
@@ -110,52 +223,112 @@ def create_figure_eight_track(size: float = 50.0,
     return CircuitTrack(segments, track_width)
 
 
-def create_racetrack(scale: float = 1.0,
+def create_racetrack(straight_length: float = 80.0,
+                     turn_radius: float = 25.0,
                      track_width: float = 5.0) -> CircuitTrack:
     """
-    Create a more complex racetrack with varied corners.
+    Create a complex racetrack with varied corners.
 
     Features:
-    - Long back straight
-    - Hairpin turn
-    - S-curves (chicane)
-    - Sweeping fast corner
+    - Two long straights (one longer for overtaking)
+    - Multiple corners of different radii
+    - Technical sections with varied turns
+    - Guaranteed closed loop with no overlaps
 
     Args:
-        scale: Scale factor for track size (1.0 = default size).
+        straight_length: Base length of straight sections in meters.
+        turn_radius: Base radius of turns in meters.
         track_width: Full width of track in meters.
 
     Returns:
         CircuitTrack instance.
     """
-    # Define waypoints with position and heading
-    # The track will connect these points using G1 Hermite interpolation
-    waypoints = [
-        # (x, y, theta) - position and heading at each waypoint
-        (0, 0, 0),                                          # Start/finish line
-        (80 * scale, 0, 0),                                 # End of main straight
-        (100 * scale, 25 * scale, math.pi / 2),             # Turn 1 - sweeping right
-        (90 * scale, 60 * scale, math.pi * 0.9),            # Hairpin entry
-        (70 * scale, 65 * scale, math.pi),                  # Hairpin apex
-        (50 * scale, 55 * scale, -math.pi * 0.7),           # Hairpin exit
-        (40 * scale, 35 * scale, -math.pi / 2),             # Chicane entry
-        (50 * scale, 15 * scale, -math.pi / 6),             # Chicane mid
-        (30 * scale, 5 * scale, math.pi),                   # Chicane exit
-        (10 * scale, 10 * scale, math.pi * 0.8),            # Final corner entry
-    ]
-
     segments = []
-
-    # Connect waypoints with G1 Hermite interpolation
-    for i in range(len(waypoints)):
-        wp0 = waypoints[i]
-        wp1 = waypoints[(i + 1) % len(waypoints)]
-
-        seg = Clothoid.G1Hermite(
-            wp0[0], wp0[1], wp0[2],  # Start: x, y, theta
-            wp1[0], wp1[1], wp1[2]   # End: x, y, theta
-        )
-        segments.append(seg)
+    
+    # Starting position and heading
+    x, y, theta = 0.0, 0.0, 0.0
+    
+    # --- BOTTOM SECTION ---
+    # Segment 1: Long main straight (start/finish)
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, straight_length * 2.0)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 2: Turn 1 - Right 90° (fast sweeping)
+    kappa = 1.0 / (turn_radius * 2.0)
+    arc_length = (math.pi / 2) * turn_radius * 2.0
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # --- RIGHT SECTION ---
+    # Segment 3: Right side straight
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, straight_length * 1.0)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 4: Turn 2 - Right 45° (entry to chicane)
+    kappa = 1.0 / (turn_radius * 1.5)
+    arc_length = (math.pi / 4) * turn_radius * 1.5
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 5: Short straight
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, straight_length * 0.3)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 6: Turn 3 - Left 45° (chicane)
+    kappa = -1.0 / (turn_radius * 1.5)
+    arc_length = (math.pi / 4) * turn_radius * 1.5
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 7: Turn 4 - Right 90° (continue up)
+    kappa = 1.0 / (turn_radius * 1.2)
+    arc_length = (math.pi / 2) * turn_radius * 1.2
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # --- TOP SECTION ---
+    # Segment 8: Top straight
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, straight_length * 1.5)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 9: Turn 5 - Right 90° (hairpin approach)
+    kappa = 1.0 / turn_radius
+    arc_length = (math.pi / 2) * turn_radius
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # --- LEFT SECTION ---
+    # Segment 10: Short straight
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, straight_length * 0.4)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 11: Turn 6 - Right 90° (complete the turn)
+    kappa = 1.0 / (turn_radius * 0.8)
+    arc_length = (math.pi / 2) * turn_radius * 0.8
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 12: Back straight
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, straight_length * 1.8)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 13: Turn 7 - Right 90° (final corner before finish)
+    kappa = 1.0 / (turn_radius * 1.5)
+    arc_length = (math.pi / 2) * turn_radius * 1.5
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
 
     return CircuitTrack(segments, track_width)
 
@@ -350,3 +523,249 @@ def create_custom_track(waypoints: List[Tuple[float, float, float]],
         segments.append(seg)
 
     return CircuitTrack(segments, track_width)
+
+
+def create_f_shaped_track(scale: float = 80.0,
+                          track_width: float = 5.0) -> CircuitTrack:
+    """
+    Create an F-shaped racing circuit similar to professional racetracks.
+    
+    Layout features:
+    - Long vertical straight (main straight)
+    - Top horizontal section with curves
+    - Middle horizontal section (like the middle bar of an F)
+    - Technical turns connecting sections
+    - Return section to close the loop
+    
+    Args:
+        scale: Overall size scaling factor in meters.
+        track_width: Full width of track in meters.
+    
+    Returns:
+        CircuitTrack instance.
+    """
+    segments = []
+    x, y, theta = 0.0, 0.0, math.pi / 2  # Start facing up
+    
+    # --- MAIN STRAIGHT (vertical, going up) ---
+    # Segment 1: Long main straight (start/finish)
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, scale * 1.2)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # --- TOP SECTION ---
+    # Segment 2: Turn 1 - Left 90° (top-left corner)
+    radius = scale * 0.3
+    kappa = 1.0 / radius
+    arc_length = (math.pi / 2) * radius
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 3: Top horizontal straight
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, scale * 0.8)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 4: Turn 2 - Right 90° (top-right corner)
+    kappa = -1.0 / (radius * 0.8)
+    arc_length = (math.pi / 2) * radius * 0.8
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # --- RIGHT DESCENT ---
+    # Segment 5: Short straight down
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, scale * 0.25)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 6: Turn 3 - Left 90° (before middle section)
+    kappa = 1.0 / (radius * 0.7)
+    arc_length = (math.pi / 2) * radius * 0.7
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # --- MIDDLE SECTION (like middle bar of F) ---
+    # Segment 7: Middle horizontal straight
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, scale * 0.6)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 8: Turn 4 - Right 90° (end of middle section)
+    kappa = -1.0 / (radius * 0.8)
+    arc_length = (math.pi / 2) * radius * 0.8
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # --- BOTTOM RETURN SECTION ---
+    # Segment 9: Straight down
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, scale * 0.35)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 10: Turn 5 - Left 90° (bottom-right corner)
+    kappa = 1.0 / (radius * 1.0)
+    arc_length = (math.pi / 2) * radius * 1.0
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 11: Bottom straight (going back left)
+    seg = Clothoid.StandardParams(x, y, theta, 0.0, 0.0, scale * 0.5)
+    segments.append(seg)
+    x, y, theta = seg.XEnd, seg.YEnd, seg.ThetaEnd
+    
+    # Segment 12: Turn 6 - Left 90° (final turn to close loop)
+    kappa = 1.0 / (radius * 0.9)
+    arc_length = (math.pi / 2) * radius * 0.9
+    seg = Clothoid.StandardParams(x, y, theta, kappa, 0.0, arc_length)
+    segments.append(seg)
+    
+    return CircuitTrack(segments, track_width)
+
+
+def create_track_from_fsg_file(filepath: str, 
+                                track_width: float = 5.0,
+                                segment_length: float = 5.0) -> CircuitTrack:
+    """
+    Create a track from FSG format file with curvature data.
+    
+    The file should contain columns:
+    - abscissa: distance along track
+    - curvature: curvature at each point
+    - x_mid_line, y_mid_line: centerline coordinates
+    - dir_mid_line: heading/direction
+    
+    Args:
+        filepath: Path to the FSG.txt file.
+        track_width: Full width of track in meters.
+        segment_length: Target length for each clothoid segment (meters).
+                       Smaller values = more accurate but more segments.
+    
+    Returns:
+        CircuitTrack instance.
+    """
+    import numpy as np
+    
+    # Read the file
+    data = []
+    with open(filepath, 'r') as f:
+        for line in f:
+            line = line.strip()
+            # Skip comments and empty lines
+            if not line or line.startswith('#') or line.startswith('!'):
+                continue
+            # Skip header
+            if 'abscissa' in line:
+                continue
+            
+            parts = line.split('\t')
+            if len(parts) >= 7:
+                try:
+                    s = float(parts[0])  # abscissa
+                    kappa = float(parts[1])  # curvature
+                    theta = float(parts[2])  # dir_mid_line
+                    x = float(parts[3])  # x_mid_line
+                    y = float(parts[4])  # y_mid_line
+                    data.append((s, kappa, theta, x, y))
+                except ValueError:
+                    continue
+    
+    if len(data) < 2:
+        raise ValueError(f"Not enough valid data points in file: {filepath}")
+    
+    # Convert to arrays
+    s_data = np.array([d[0] for d in data])
+    kappa_data = np.array([d[1] for d in data])
+    theta_data = np.array([d[2] for d in data])
+    x_data = np.array([d[3] for d in data])
+    y_data = np.array([d[4] for d in data])
+    
+    # Create segments by sampling at regular intervals
+    segments = []
+    total_length = s_data[-1]
+    num_segments = int(total_length / segment_length)
+    
+    if num_segments < 10:
+        num_segments = 10  # Minimum segments
+    
+    for i in range(num_segments):
+        # Start and end of this segment
+        s_start = i * segment_length
+        s_end = (i + 1) * segment_length if i < num_segments - 1 else total_length
+        seg_length = s_end - s_start
+        
+        # Find indices for interpolation
+        idx_start = np.searchsorted(s_data, s_start)
+        idx_end = np.searchsorted(s_data, s_end)
+        
+        if idx_start >= len(s_data):
+            idx_start = len(s_data) - 1
+        if idx_end >= len(s_data):
+            idx_end = len(s_data) - 1
+        
+        # Get values at segment start
+        if idx_start < len(s_data):
+            x_start = float(x_data[idx_start])
+            y_start = float(y_data[idx_start])
+            theta_start = float(theta_data[idx_start])
+            kappa_start = float(kappa_data[idx_start])
+        else:
+            # Wrap to start for closure
+            x_start = float(x_data[0])
+            y_start = float(y_data[0])
+            theta_start = float(theta_data[0])
+            kappa_start = float(kappa_data[0])
+        
+        # Average curvature over segment for better approximation
+        if idx_start < idx_end:
+            kappa_avg = float(np.mean(kappa_data[idx_start:idx_end+1]))
+        else:
+            kappa_avg = kappa_start
+        
+        # Create clothoid segment with constant curvature (dk=0)
+        try:
+            seg = Clothoid.StandardParams(
+                x_start, y_start, theta_start,
+                kappa_avg, 0.0, seg_length
+            )
+            segments.append(seg)
+        except Exception as e:
+            print(f"Warning: Could not create segment {i}: {e}")
+            continue
+    
+    if len(segments) == 0:
+        raise ValueError("No valid segments created from file data")
+    
+    return CircuitTrack(segments, track_width)
+
+
+def create_varano_track(track_width: float = 5.0,
+                        segment_length: float = 5.0) -> CircuitTrack:
+    """
+    Create Varano racing circuit from data file.
+    
+    Loads the Varano circuit geometry from the Varano.txt file.
+    The file contains curvature and centerline coordinates.
+    
+    Args:
+        track_width: Full width of track in meters (default: 5.0).
+        segment_length: Length of each clothoid segment for approximation (default: 5m).
+                       Smaller values = more accurate but more segments.
+    
+    Returns:
+        CircuitTrack instance of Varano circuit.
+    """
+    import os
+    
+    # Get the path to Varano.txt file (should be in same directory as this file)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    varano_file = os.path.join(current_dir, "Varano.txt")
+    
+    if not os.path.exists(varano_file):
+        raise FileNotFoundError(f"Varano.txt not found at: {varano_file}")
+    
+    return create_track_from_fsg_file(varano_file, track_width, segment_length)
